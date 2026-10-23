@@ -571,7 +571,7 @@
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxvXaPaj-B8rzOKm-PQpOUycm15WLRHaSxNcpHYULvN0d41FtmSKzHmkU0PJFOKrSes/exec";
     
     // Inserisci qui il tuo OAuth Client ID generato su Google Cloud Console
-    const GOOGLE_CLIENT_ID = "INSERISCI_QUI_IL_TUO_CLIENT_ID.apps.googleusercontent.com";
+    const GOOGLE_CLIENT_ID = "566113387609-3ko0vrp31fqspr523sffucbvuto43h4f.apps.googleusercontent.com";
 
     let utenteCorrente = null;
     let selectedDayNumber = null;
@@ -868,8 +868,6 @@
     }
 
     async function eliminaEvento() {
-      if (!confirm("Vuoi davvero annullare questo evento? La riga rimarrà archiviata nel foglio come Annullata.")) return;
-      
       const day = selectedDayNumber;
       const ev = eventsData[day];
       if (!ev) return;
