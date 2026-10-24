@@ -477,9 +477,9 @@
 
     <!-- Intestazione Calendario -->
     <div class="calendar-header">
-      <button onclick="mostraToast('Visualizzazione mese corrente')">&lt;</button>
+      <button onclick="cambiaMese(-1)">&lt;</button>
       <span id="monthYear">Ottobre 2026</span>
-      <button onclick="mostraToast('Visualizzazione mese corrente')">&gt;</button>
+      <button onclick="cambiaMese(1)">&gt;</button>
     </div>
     
     <!-- Legenda Ufficiale -->
@@ -579,6 +579,11 @@
     let selectedDayNumber = null;
     let eventsData = {};
     let tentativiCaricamentoGoogle = 0;
+
+    // Mese visualizzato: il calendario parte dal mese corrente.
+    let meseVisualizzato = new Date();
+    meseVisualizzato = new Date(meseVisualizzato.getFullYear(), meseVisualizzato.getMonth(), 1);
+    let selectedDateKey = null;
 
     // Inizializza eventuale sfondo personalizzato salvato in locale
     inizializzaSfondo();
@@ -762,13 +767,59 @@
     // -------------------------------------------------------------
     // GESTIONE CALENDARIO E SINCRONIZZAZIONE FOGLI
     // -------------------------------------------------------------
+    function chiaveData(data) {
+      const anno = data.getFullYear();
+      const mese = String(data.getMonth() + 1).padStart(2, '0');
+      const giorno = String(data.getDate()).padStart(2, '0');
+      return `${anno}-${mese}-${giorno}`;
+    }
+
+    function dataDaValore(valore) {
+      const testo = (valore || "").toString().trim();
+      let match;
+
+      match = testo.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+      if (match) return new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
+
+      match = testo.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if (match) return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+
+      // Compatibilità con eventuali vecchie righe contenenti solo il giorno.
+      match = testo.match(/^(\d{1,2})$/);
+      if (match) return new Date(meseVisualizzato.getFullYear(), meseVisualizzato.getMonth(), Number(match[1]));
+
+      return null;
+    }
+
+    function formattaDataItaliana(giorno) {
+      const data = selectedDateKey
+        ? dataDaValore(selectedDateKey)
+        : new Date(meseVisualizzato.getFullYear(), meseVisualizzato.getMonth(), Number(giorno));
+      if (!data || isNaN(data.getTime())) return "";
+      return `${String(data.getDate()).padStart(2, '0')}/${String(data.getMonth() + 1).padStart(2, '0')}/${data.getFullYear()}`;
+    }
+
+    function cambiaMese(direzione) {
+      meseVisualizzato = new Date(meseVisualizzato.getFullYear(), meseVisualizzato.getMonth() + direzione, 1);
+      generaGrigliaCalendario();
+    }
+
     function generaGrigliaCalendario() {
       const container = document.getElementById('calendarDays');
-      container.innerHTML = "";
+      const titolo = document.getElementById('monthYear');
+      if (!container || !titolo) return;
 
-      // Ottobre 2026: 1 Ottobre è Giovedì -> 3 celle vuote (Lun, Mar, Mer)
-      const offsetIniziale = 3;
-      const totaleGiorni = 31;
+      container.innerHTML = "";
+      titolo.textContent = meseVisualizzato.toLocaleDateString('it-IT', {
+        month: 'long',
+        year: 'numeric'
+      });
+      titolo.textContent = titolo.textContent.charAt(0).toUpperCase() + titolo.textContent.slice(1);
+
+      const anno = meseVisualizzato.getFullYear();
+      const mese = meseVisualizzato.getMonth();
+      const offsetIniziale = (new Date(anno, mese, 1).getDay() + 6) % 7;
+      const totaleGiorni = new Date(anno, mese + 1, 0).getDate();
 
       for (let i = 0; i < offsetIniziale; i++) {
         const emptyCell = document.createElement('div');
@@ -778,8 +829,9 @@
 
       for (let g = 1; g <= totaleGiorni; g++) {
         const dayCell = document.createElement('div');
+        const dataKey = chiaveData(new Date(anno, mese, g));
         dayCell.className = 'day';
-        dayCell.id = `day-${g}`;
+        dayCell.id = `day-${dataKey}`;
         dayCell.textContent = g;
         dayCell.onclick = () => apriModaleGiorno(g);
         container.appendChild(dayCell);
@@ -796,34 +848,21 @@
           if (data && data.eventi) {
             eventsData = {};
             data.eventi.forEach(ev => {
-              const dataStr = (ev.data || "").toString().trim();
-              let giorno = null;
-
-              // Riconosce formati italiani GG/MM/AAAA o ISO AAAA-MM-GG
-              if (dataStr.includes('/')) {
-                const parts = dataStr.split('/');
-                giorno = parseInt(parts[0], 10);
-              } else if (dataStr.includes('-')) {
-                const parts = dataStr.split('-');
-                giorno = parseInt(parts[2], 10);
-              } else if (!isNaN(parseInt(dataStr, 10))) {
-                giorno = parseInt(dataStr, 10);
-              }
-
-              if (giorno && giorno >= 1 && giorno <= 31) {
-                eventsData[giorno] = {
-                  id: ev.id,
-                  data: ev.data,
-                  orario: ev.orario || "",
-                  nome: ev.nome || "",
-                  telefono: ev.telefono || "",
-                  stato: ev.stato || "Appuntamento",
-                  acconto: ev.acconto || "",
-                  note: ev.note || "",
-                  inseritoDa: ev.inseritoDa || "",
-                  dataCreazione: ev.dataCreazione || ""
-                };
-              }
+              const dataEvento = dataDaValore(ev.data);
+              if (!dataEvento || isNaN(dataEvento.getTime())) return;
+              const dataKey = chiaveData(dataEvento);
+              eventsData[dataKey] = {
+                id: ev.id,
+                data: ev.data,
+                orario: ev.orario || "",
+                nome: ev.nome || "",
+                telefono: ev.telefono || "",
+                stato: ev.stato || "Appuntamento",
+                acconto: ev.acconto || "",
+                note: ev.note || "",
+                inseritoDa: ev.inseritoDa || "",
+                dataCreazione: ev.dataCreazione || ""
+              };
             });
             applicaColoriCalendario();
             mostraToast("Dati sincronizzati!");
@@ -836,13 +875,10 @@
     }
 
     function applicaColoriCalendario() {
-      for (let g = 1; g <= 31; g++) {
-        const cella = document.getElementById(`day-${g}`);
-        if (!cella) continue;
-
+      const celle = document.querySelectorAll('#calendarDays .day:not(.empty)');
+      celle.forEach(cella => {
         cella.classList.remove('appointment', 'requested', 'blocked');
-
-        const evento = eventsData[g];
+        const evento = eventsData[cella.id.replace('day-', '')];
         if (evento && evento.stato) {
           if (evento.stato === "Appuntamento") {
             cella.classList.add('appointment');
@@ -852,25 +888,21 @@
             cella.classList.add('blocked');
           }
         }
-      }
+      });
     }
 
     // -------------------------------------------------------------
     // GESTIONE MODALE EVENTO
     // -------------------------------------------------------------
-    function formattaDataItaliana(giorno) {
-      const gStr = giorno < 10 ? `0${giorno}` : giorno;
-      return `${gStr}/10/2026`;
-    }
-
     function apriModaleGiorno(giorno) {
       selectedDayNumber = giorno;
+      selectedDateKey = chiaveData(new Date(meseVisualizzato.getFullYear(), meseVisualizzato.getMonth(), giorno));
       const dataItaliana = formattaDataItaliana(giorno);
 
       document.getElementById('modalTitle').textContent = `Giorno ${giorno}`;
       document.getElementById('modalDateSubtitle').textContent = dataItaliana;
 
-      const evento = eventsData[giorno];
+      const evento = eventsData[selectedDateKey];
       const auditBox = document.getElementById('auditStamp');
       const btnDelete = document.getElementById('btnDelete');
 
@@ -906,6 +938,7 @@
     function chiudiModale() {
       document.getElementById('eventModal').style.display = 'none';
       selectedDayNumber = null;
+      selectedDateKey = null;
     }
 
     function selezionaTipoVeloce(tipo) {
@@ -921,8 +954,9 @@
       if (!selectedDayNumber) return;
 
       const giorno = selectedDayNumber;
+      const dataKey = selectedDateKey || chiaveData(new Date(meseVisualizzato.getFullYear(), meseVisualizzato.getMonth(), giorno));
       const dataItaliana = formattaDataItaliana(giorno);
-      const eventoEsistente = eventsData[giorno];
+      const eventoEsistente = eventsData[dataKey];
 
       const eventoPayload = {
         action: "saveEvent",
@@ -952,7 +986,7 @@
         btnSave.textContent = "Salva";
 
         if (result && result.success) {
-          eventsData[giorno] = {
+          eventsData[dataKey] = {
             id: eventoPayload.id,
             data: eventoPayload.data,
             orario: eventoPayload.orario,
@@ -980,10 +1014,10 @@
     }
 
     function eliminaEvento() {
-      if (!selectedDayNumber || !eventsData[selectedDayNumber]) return;
+      if (!selectedDateKey || !eventsData[selectedDateKey]) return;
 
-      const giorno = selectedDayNumber;
-      const idEvento = eventsData[giorno].id;
+      const dataKey = selectedDateKey;
+      const idEvento = eventsData[dataKey].id;
       const btnDelete = document.getElementById('btnDelete');
 
       btnDelete.disabled = true;
@@ -1000,7 +1034,7 @@
         btnDelete.textContent = "Elimina";
 
         if (result && result.success) {
-          delete eventsData[giorno];
+          delete eventsData[dataKey];
           applicaColoriCalendario();
           chiudiModale();
           mostraToast("Evento annullato");
