@@ -6,7 +6,7 @@
   <title>Party App - Gestione Appuntamenti</title>
   
   <!-- Libreria Ufficiale Google Identity Services -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://accounts.google.com/gsi/client" async defer onload="inizializzaGoogleSignIn()"></script>
 
   <style>
     :root {
@@ -44,13 +44,13 @@
     }
 
     .login-card {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(12px);
       border-radius: 24px;
       padding: 35px 25px;
       width: 100%;
       max-width: 380px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.18);
       text-align: center;
       box-sizing: border-box;
     }
@@ -60,6 +60,7 @@
       font-weight: 900;
       color: #1e293b;
       margin-bottom: 6px;
+      letter-spacing: -0.5px;
     }
 
     .login-subtitle {
@@ -72,8 +73,28 @@
     .google-btn-wrapper {
       display: flex;
       justify-content: center;
+      align-items: center;
       margin: 20px 0 10px;
-      min-height: 44px;
+      min-height: 48px;
+    }
+
+    .loading-spinner {
+      font-size: 0.85rem;
+      color: #64748b;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toggle-fallback-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 0.75rem;
+      margin-top: 15px;
+      cursor: pointer;
+      text-decoration: underline;
     }
 
     .login-fallback-box {
@@ -82,6 +103,7 @@
       border-top: 1px dashed #cbd5e1;
       font-size: 0.8rem;
       color: #64748b;
+      display: none; /* Nascosto di default, visibile solo se Google fallisce o su richiesta */
     }
 
     .login-fallback-box input {
@@ -98,7 +120,7 @@
       background: #475569;
       color: white;
       border: none;
-      padding: 8px 14px;
+      padding: 10px 14px;
       border-radius: 8px;
       font-weight: bold;
       cursor: pointer;
@@ -114,7 +136,7 @@
       display: none;
       line-height: 1.4;
       background: #fee2e2;
-      padding: 10px;
+      padding: 12px;
       border-radius: 10px;
     }
 
@@ -445,16 +467,21 @@
       <div class="login-subtitle">Accesso Riservato Staff</div>
       
       <!-- Contenitore Pulsante Google Identity Services -->
-      <div id="googleBtnContainer" class="google-btn-wrapper"></div>
+      <div id="googleBtnContainer" class="google-btn-wrapper">
+        <span class="loading-spinner">Caricamento accesso sicuro...</span>
+      </div>
 
       <!-- Errore Login -->
       <div id="loginError" class="login-error"></div>
 
-      <!-- Modalità Collaudo/Manuale (se il Client ID non è ancora inserito) -->
+      <!-- Tasto discreto per emergenza/collaudo -->
+      <button type="button" class="toggle-fallback-btn" onclick="toggleFallback()">Problemi con il tasto Google? Clicca qui</button>
+
+      <!-- Modalità Collaudo/Manuale di riserva -->
       <div id="devFallbackBox" class="login-fallback-box">
-        <span>Oppure accedi temporaneamente con email autorizzata:</span>
+        <span>Accesso emergenza con email autorizzata:</span>
         <input type="email" id="manualEmailInput" placeholder="nome@locale.it">
-        <button class="btn-fallback" onclick="eseguiAccessoManuale()">Verifica Email Staff</button>
+        <button class="btn-fallback" onclick="eseguiAccessoManuale()">Entra con Email</button>
       </div>
     </div>
   </div>
@@ -569,20 +596,18 @@
     // CONFIGURAZIONI PRINCIPALI
     // -------------------------------------------------------------
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxvXaPaj-B8rzOKm-PQpOUycm15WLRHaSxNcpHYULvN0d41FtmSKzHmkU0PJFOKrSes/exec";
-    
-    // Inserisci qui il tuo OAuth Client ID generato su Google Cloud Console
     const GOOGLE_CLIENT_ID = "566113387609-3ko0vrp31fqspr523sffucbvuto43h4f.apps.googleusercontent.com";
 
     let utenteCorrente = null;
     let selectedDayNumber = null;
     let eventsData = {};
+    let tentativiCaricamentoGoogle = 0;
 
     try {
       const stored = localStorage.getItem('partyAppUser');
       if (stored) utenteCorrente = JSON.parse(stored);
     } catch(e) {}
 
-    // Inizializzazione al caricamento
     window.addEventListener('DOMContentLoaded', () => {
       if (utenteCorrente && utenteCorrente.email) {
         mostraDashboard();
@@ -591,33 +616,54 @@
       }
     });
 
-    // Inizializzazione Google Identity Services
+    // Inizializzazione sicura e resiliente del pulsante Google
     function inizializzaGoogleSignIn() {
-      if (window.google && GOOGLE_CLIENT_ID && !GOOGLE_CLIENT_ID.startsWith("INSERISCI_QUI")) {
-        google.accounts.id.initialize({
-          client_id: GOOGLE_CLIENT_ID,
-          callback: gestisciRispostaGoogle,
-          auto_select: false
-        });
+      const container = document.getElementById("googleBtnContainer");
+      if (!container) return;
 
-        google.accounts.id.renderButton(
-          document.getElementById("googleBtnContainer"),
-          { 
-            theme: "outline", 
-            size: "large", 
-            shape: "pill",
-            text: "signin_with",
-            locale: "it"
-          }
-        );
+      if (window.google && window.google.accounts && window.google.accounts.id) {
+        try {
+          google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: gestisciRispostaGoogle,
+            auto_select: false
+          });
+
+          container.innerHTML = ""; // Rimuove lo spinner
+          google.accounts.id.renderButton(
+            container,
+            { 
+              theme: "outline", 
+              size: "large", 
+              shape: "pill",
+              text: "signin_with",
+              locale: "it",
+              width: 280
+            }
+          );
+        } catch (err) {
+          console.error("Errore inizializzazione Google:", err);
+          mostraErroreLogin("Configurazione Google in corso. Usa l'opzione qui sotto.");
+          document.getElementById('devFallbackBox').style.display = 'block';
+        }
       } else {
-        // Avviso che il Client ID deve essere ancora configurato
-        document.getElementById("googleBtnContainer").innerHTML = 
-          `<p style="font-size:0.75rem; color:#64748b; margin:0;">In attesa del Google Client ID.<br>Puoi usare l'accesso manuale qui sotto.</p>`;
+        // Se la libreria Google non è ancora pronta, riprova ogni 250ms fino a 20 volte (5 secondi)
+        if (tentativiCaricamentoGoogle < 20) {
+          tentativiCaricamentoGoogle++;
+          setTimeout(inizializzaGoogleSignIn, 250);
+        } else {
+          container.innerHTML = `<span style="font-size:0.8rem; color:#dc2626;">Impossibile contattare Google.</span>`;
+          document.getElementById('devFallbackBox').style.display = 'block';
+        }
       }
     }
 
-    // Decodifica del Token JWT restituito da Google
+    function toggleFallback() {
+      const box = document.getElementById('devFallbackBox');
+      box.style.display = (box.style.display === 'block') ? 'none' : 'block';
+    }
+
+    // Decodifica sicura del Token JWT fornito da Google
     function decodificaJwtGoogle(token) {
       try {
         const base64Url = token.split('.')[1];
@@ -631,11 +677,11 @@
       }
     }
 
-    // Callback richiamata da Google al login avvenuto con successo
+    // Risposta ufficiale da Google dopo autenticazione con impronta o password
     async function gestisciRispostaGoogle(response) {
       const payload = decodificaJwtGoogle(response.credential);
       if (!payload || !payload.email) {
-        mostraErroreLogin("Impossibile verificare l'account con Google.");
+        mostraErroreLogin("Verifica Google non riuscita. Riprova.");
         return;
       }
 
@@ -645,7 +691,7 @@
       await verificaStaffSuFoglio(emailGoogle, nomeGoogle);
     }
 
-    // Modalità manuale di collaudo
+    // Modalità manuale di collaudo/emergenza
     async function eseguiAccessoManuale() {
       const email = document.getElementById('manualEmailInput').value.trim().toLowerCase();
       if (!email || !email.includes('@')) {
@@ -655,10 +701,10 @@
       await verificaStaffSuFoglio(email, email);
     }
 
-    // Verifica presenza dell'email nella scheda 'Staff' di Google Fogli
+    // Verifica presenza nella scheda 'Staff' di Google Fogli
     async function verificaStaffSuFoglio(email, nomeDisplay) {
       nascondiErroreLogin();
-      mostraToast("Verifica autorizzazioni Staff in corso...", "#3b82f6");
+      mostraToast("Verifica autorizzazione Staff...", "#3b82f6");
 
       try {
         const res = await fetch(`${SCRIPT_URL}?action=checkStaff&email=${encodeURIComponent(email)}`);
@@ -672,12 +718,12 @@
           };
           localStorage.setItem('partyAppUser', JSON.stringify(utenteCorrente));
           mostraDashboard();
-          mostraToast(`Benvenuto/a ${utenteCorrente.nome}!`, "#10b981");
+          mostraToast(`Benvenuto ${utenteCorrente.nome}!`, "#10b981");
         } else {
-          mostraErroreLogin(`⚠️ L'account <b>${email}</b> non risulta nell'elenco Staff del foglio Google.`);
+          mostraErroreLogin(`⚠️ L'account <b>${email}</b> non è autorizzato nel foglio Staff.`);
         }
       } catch (err) {
-        mostraErroreLogin("Errore di rete durante la verifica del foglio. Riprova tra poco.");
+        mostraErroreLogin("Errore di connessione al database Google. Riprova tra poco.");
       }
     }
 
@@ -754,8 +800,7 @@
       const grid = document.getElementById('calendarDays');
       grid.innerHTML = '';
       
-      // Ottobre 2026: inizia di Giovedì (3 caselle vuote iniziali)
-      const startDay = 3; 
+      const startDay = 3; // Ottobre 2026 inizia di Giovedì
       const totalDays = 31;
 
       for (let i = 0; i < startDay; i++) {
@@ -840,7 +885,6 @@
         userEmail: utenteCorrente.email
       };
 
-      // Aggiornamento ottimistico locale
       eventsData[day] = {
         ...payload,
         inseritoDa: utenteCorrente.email,
