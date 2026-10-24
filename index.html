@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Party App - Gestione Appuntamenti</title>
+  <title>Party App - Inside Out Party</title>
   
   <!-- Libreria Ufficiale Google Identity Services -->
   <script src="https://accounts.google.com/gsi/client" async defer onload="inizializzaGoogleSignIn()"></script>
@@ -22,20 +22,21 @@
       margin: 0; 
       padding: 0; 
       background-color: var(--bg-main); 
-      /* Sfondo con immagine personalizzata o gradiente professionale di riserva */
-      background-image: linear-gradient(rgba(248, 250, 252, 0.85), rgba(248, 250, 252, 0.85)), url('sfondo.jpg');
+      /* Supporto prioritario per sfondo.png con fallback su sfondo.jpg */
+      background-image: linear-gradient(rgba(248, 250, 252, 0.88), rgba(248, 250, 252, 0.88)), url('sfondo.png'), url('sfondo.jpg');
       background-size: cover;
       background-attachment: fixed;
       background-position: center;
       background-repeat: no-repeat;
       color: var(--text-main);
       -webkit-tap-highlight-color: transparent;
+      min-height: 100vh;
     }
     
-    /* SCHERMATA LOGIN */
+    /* SCHERMATA LOGIN (ESCLUSIVAMENTE GOOGLE SIGN-IN) */
     .login-screen {
       height: 100vh;
-      background: linear-gradient(135deg, rgba(250, 204, 21, 0.9) 0%, rgba(74, 222, 128, 0.9) 25%, rgba(96, 165, 250, 0.9) 50%, rgba(192, 132, 252, 0.9) 75%, rgba(239, 68, 68, 0.9) 100%), url('sfondo.jpg');
+      background: linear-gradient(135deg, rgba(250, 204, 21, 0.88) 0%, rgba(74, 222, 128, 0.88) 25%, rgba(96, 165, 250, 0.88) 50%, rgba(192, 132, 252, 0.88) 75%, rgba(239, 68, 68, 0.88) 100%), url('sfondo.png'), url('sfondo.jpg');
       background-size: cover;
       background-position: center;
       display: flex; 
@@ -44,6 +45,7 @@
       justify-content: center; 
       padding: 20px;
       box-sizing: border-box;
+      position: relative;
     }
 
     .login-card {
@@ -100,6 +102,7 @@
       background: #fee2e2;
       padding: 12px;
       border-radius: 12px;
+      border: 1px solid #fca5a5;
     }
 
     /* BARRA SUPERIORE APP */
@@ -117,7 +120,7 @@
       align-items: center;
       background: rgba(255, 255, 255, 0.94);
       backdrop-filter: blur(10px);
-      padding: 12px 18px;
+      padding: 12px 16px;
       border-radius: 16px;
       margin-bottom: 14px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.06);
@@ -131,16 +134,23 @@
       border-radius: 50%;
       background: #22c55e;
     }
-    .btn-logout {
+    .top-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .btn-top {
       background: #f1f5f9;
       border: none;
       color: #475569;
-      padding: 6px 12px;
+      padding: 7px 11px;
       border-radius: 8px;
       font-weight: 700;
       cursor: pointer;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
+      transition: background 0.15s;
     }
+    .btn-top:active { background: #e2e8f0; }
 
     .calendar-header { 
       display: flex; 
@@ -218,28 +228,28 @@
     }
     .day:active { transform: scale(0.92); }
     
-    /* STATI GRAFICI GIORNI */
+    /* STATI GRAFICI DEI GIORNI */
     .day.appointment { 
       background: var(--color-appuntamento); 
       color: white; 
       border: 2px solid #16a34a; 
-      box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3);
+      box-shadow: 0 4px 10px rgba(34, 197, 94, 0.35);
     } 
     .day.requested { 
       background: var(--color-richiesta); 
       color: #713f12; 
       border: 2px solid #ca8a04; 
-      box-shadow: 0 4px 10px rgba(234, 179, 8, 0.3);
+      box-shadow: 0 4px 10px rgba(234, 179, 8, 0.35);
     } 
     .day.blocked { 
       background: var(--color-bloccata); 
       color: white; 
       border: 2px solid #dc2626; 
-      box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
+      box-shadow: 0 4px 10px rgba(239, 68, 68, 0.35);
     } 
     .day.empty { background: transparent; box-shadow: none; cursor: default; }
 
-    /* MENU INFERIORE */
+    /* MENU INFERIORE AZIONI RAPIDE */
     .bottom-bar { 
       position: fixed; 
       bottom: 0; 
@@ -403,7 +413,7 @@
       display: none;
     }
 
-    /* NOTIFICA TOAST */
+    /* TOAST NOTIFICHE */
     .toast-notification {
       position: fixed;
       bottom: 95px; 
@@ -429,39 +439,47 @@
 </head>
 <body>
 
-  <!-- SCHERMATA LOGIN (SOLO GOOGLE UFFICIALE) -->
+  <!-- INPUT FILE INVISIBILE PER L'UPLOAD DIRETTO DI UN NUOVO SFONDO -->
+  <input type="file" id="bgFileInput" accept="image/*" style="display:none;" onchange="elaboraSfondoCaricato(event)">
+
+  <!-- SCHERMATA LOGIN (ESCLUSIVAMENTE GOOGLE SIGN-IN) -->
   <div id="loginScreen" class="login-screen">
     <div class="login-card">
       <div class="login-logo">Party App</div>
-      <div class="login-subtitle">Accesso Riservato Staff</div>
+      <div class="login-subtitle">Inside Out Party - Staff Riservato</div>
       
       <!-- Contenitore Ufficiale Google Identity Services -->
       <div id="googleBtnContainer" class="google-btn-wrapper">
         <span class="loading-spinner">Caricamento accesso sicuro Google...</span>
       </div>
 
-      <!-- Errore Login (se l'utente non è autorizzato sul foglio Staff) -->
+      <!-- Messaggio di errore se l'utente non è censito nella scheda Staff -->
       <div id="loginError" class="login-error"></div>
     </div>
   </div>
 
-  <!-- DASHBOARD GESTIONALE -->
+  <!-- DASHBOARD PRINCIPALE APP -->
   <div id="appScreen" class="app-screen">
     
     <!-- Barra Utente Staff -->
     <div class="top-user-bar">
       <div class="user-info">
         <span class="status-badge"></span>
-        <span id="labelLoggedUser">Staff collegato</span>
+        <span id="labelLoggedUser">Staff Inside Out</span>
       </div>
-      <button class="btn-logout" onclick="eseguiLogout()">Esci</button>
+      <div class="top-actions">
+        <!-- Tasto per caricare direttamente lo sfondo dal proprio smartphone o computer -->
+        <button class="btn-top" title="Carica sfondo personalizzato" onclick="document.getElementById('bgFileInput').click()">🖼️ Sfondo</button>
+        <button class="btn-top" title="Aggiorna calendario" onclick="caricaEventiDalFoglio()">🔄</button>
+        <button class="btn-top" onclick="eseguiLogout()">Esci</button>
+      </div>
     </div>
 
     <!-- Intestazione Calendario -->
     <div class="calendar-header">
-      <button>&lt;</button>
+      <button onclick="mostraToast('Visualizzazione mese corrente')">&lt;</button>
       <span id="monthYear">Ottobre 2026</span>
-      <button>&gt;</button>
+      <button onclick="mostraToast('Visualizzazione mese corrente')">&gt;</button>
     </div>
     
     <!-- Legenda Ufficiale -->
@@ -471,7 +489,7 @@
       <div class="legend-item"><div class="dot red"></div> Data Bloccata</div>
     </div>
 
-    <!-- Griglia Giorni della Settimana -->
+    <!-- Giorni della Settimana -->
     <div class="calendar-grid">
       <div class="day-name">LUN</div><div class="day-name">MAR</div><div class="day-name">MER</div>
       <div class="day-name">GIO</div><div class="day-name">VEN</div><div class="day-name">SAB</div><div class="day-name">DOM</div>
@@ -480,7 +498,7 @@
     <!-- Caselle dei giorni -->
     <div class="calendar-grid" id="calendarDays"></div>
 
-    <!-- Barra Azioni Rapide -->
+    <!-- Barra Azioni Rapide Inferiore -->
     <div class="bottom-bar">
       <div class="bottom-bar-inner">
         <button class="btn-action appuntamento" onclick="selezionaTipoVeloce('Appuntamento')">Appuntamento</button>
@@ -498,7 +516,7 @@
         <span class="modal-subtitle" id="modalDateSubtitle"></span>
       </div>
 
-      <!-- Informazioni di tracciamento e orario italiano -->
+      <!-- Tracciamento audit italiano -->
       <div id="auditStamp" class="audit-stamp"></div>
       
       <div class="form-group">
@@ -547,12 +565,12 @@
     </div>
   </div>
 
-  <!-- NOTIFICA A SCOMPARSA -->
+  <!-- NOTIFICA TOAST -->
   <div id="toastMessage" class="toast-notification"></div>
 
   <script>
     // -------------------------------------------------------------
-    // CONFIGURAZIONI UFFICIALI
+    // CONFIGURAZIONI UFFICIALI INSIDE OUT PARTY
     // -------------------------------------------------------------
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxvXaPaj-B8rzOKm-PQpOUycm15WLRHaSxNcpHYULvN0d41FtmSKzHmkU0PJFOKrSes/exec";
     const GOOGLE_CLIENT_ID = "566113387609-3ko0vrp31fqspr523sffucbvuto43h4f.apps.googleusercontent.com";
@@ -561,6 +579,9 @@
     let selectedDayNumber = null;
     let eventsData = {};
     let tentativiCaricamentoGoogle = 0;
+
+    // Inizializza eventuale sfondo personalizzato salvato in locale
+    inizializzaSfondo();
 
     // Recupera eventuale sessione attiva
     try {
@@ -576,47 +597,86 @@
       }
     });
 
-    // Inizializzazione esclusiva del vero Google Sign-In
-    function inizializzaGoogleSignIn() {
-      const container = document.getElementById("googleBtnContainer");
-      if (!container) return;
-
-      if (window.google && window.google.accounts && window.google.accounts.id) {
-        try {
-          google.accounts.id.initialize({
-            client_id: GOOGLE_CLIENT_ID,
-            callback: gestisciRispostaGoogle,
-            auto_select: false
-          });
-
-          container.innerHTML = "";
-          google.accounts.id.renderButton(
-            container,
-            { 
-              theme: "outline", 
-              size: "large", 
-              shape: "pill",
-              text: "signin_with",
-              locale: "it",
-              width: 280
-            }
-          );
-        } catch (err) {
-          console.error("Errore inizializzazione Google:", err);
-          mostraErroreLogin("Errore nel collegamento a Google. Ricarica la pagina.");
+    // -------------------------------------------------------------
+    // GESTIONE SFONDO PERSONALIZZATO (UPLOAD DIRETTO E FALLBACK)
+    // -------------------------------------------------------------
+    function inizializzaSfondo() {
+      try {
+        const bgSalvato = localStorage.getItem('partyAppCustomBg');
+        if (bgSalvato) {
+          applicaSfondo(bgSalvato);
         }
-      } else {
-        if (tentativiCaricamentoGoogle < 25) {
-          tentativiCaricamentoGoogle++;
-          setTimeout(inizializzaGoogleSignIn, 200);
-        } else {
-          container.innerHTML = `<span style="font-size:0.85rem; color:#dc2626; font-weight:700;">Connessione a Google non riuscita.<br>Ricarica la pagina.</span>`;
-        }
+      } catch(e) {}
+    }
+
+    function applicaSfondo(dataUrl) {
+      document.body.style.backgroundImage = `linear-gradient(rgba(248, 250, 252, 0.88), rgba(248, 250, 252, 0.88)), url('${dataUrl}')`;
+      const login = document.getElementById('loginScreen');
+      if (login) {
+        login.style.background = `linear-gradient(135deg, rgba(250, 204, 21, 0.88) 0%, rgba(74, 222, 128, 0.88) 25%, rgba(96, 165, 250, 0.88) 50%, rgba(192, 132, 252, 0.88) 75%, rgba(239, 68, 68, 0.88) 100%), url('${dataUrl}')`;
+        login.style.backgroundSize = 'cover';
+        login.style.backgroundPosition = 'center';
       }
     }
 
-    // Decodifica sicura del Token JWT Google
-    function decodificaJwtGoogle(token) {
+    function elaboraSfondoCaricato(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const dataUrl = e.target.result;
+        try {
+          localStorage.setItem('partyAppCustomBg', dataUrl);
+        } catch(err) {
+          console.warn("Impossibile salvare in localStorage (dimensione elevata), applico alla sessione");
+        }
+        applicaSfondo(dataUrl);
+        mostraToast("Nuovo sfondo applicato con successo!");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // -------------------------------------------------------------
+    // AUTENTICAZIONE CON GOOGLE SIGN-IN UFFICIALE
+    // -------------------------------------------------------------
+    function inizializzaGoogleSignIn() {
+      if (typeof google === 'undefined' || !google.accounts || !google.accounts.id) {
+        tentativiCaricamentoGoogle++;
+        if (tentativiCaricamentoGoogle < 20) {
+          setTimeout(inizializzaGoogleSignIn, 200);
+        } else {
+          mostraErroreLogin("Impossibile caricare il servizio Google. Verifica la tua connessione internet.");
+        }
+        return;
+      }
+
+      try {
+        google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: gestisciRispostaGoogle,
+          auto_select: false
+        });
+
+        const container = document.getElementById('googleBtnContainer');
+        if (container) {
+          container.innerHTML = "";
+          google.accounts.id.renderButton(container, {
+            theme: "outline",
+            size: "large",
+            shape: "pill",
+            text: "signin_with",
+            locale: "it",
+            width: 260
+          });
+        }
+      } catch (err) {
+        console.error("Errore inizializzazione Google:", err);
+        mostraErroreLogin("Errore di configurazione Google Sign-In.");
+      }
+    }
+
+    function decodificaJwt(token) {
       try {
         const base64Url = token.split('.')[1];
         const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
@@ -629,55 +689,63 @@
       }
     }
 
-    // Ricezione risposta autenticata da Google
-    async function gestisciRispostaGoogle(response) {
-      const payload = decodificaJwtGoogle(response.credential);
+    function gestisciRispostaGoogle(response) {
+      const payload = decodificaJwt(response.credential);
       if (!payload || !payload.email) {
-        mostraErroreLogin("Accesso con Google non riuscito. Riprova.");
+        mostraErroreLogin("Accesso fallito. Riprova con un altro account Google.");
         return;
       }
 
       const emailGoogle = payload.email.toLowerCase().trim();
-      const nomeGoogle = payload.name || emailGoogle;
+      const nomeGoogle = payload.name || payload.given_name || "Operatore Staff";
 
-      await verificaStaffSuFoglio(emailGoogle, nomeGoogle);
+      const container = document.getElementById('googleBtnContainer');
+      if (container) {
+        container.innerHTML = `<span class="loading-spinner">Verifica autorizzazione staff in corso...</span>`;
+      }
+
+      // Verifica incrociata con la scheda "Staff" di Google Fogli
+      fetch(`${SCRIPT_URL}?action=checkStaff&email=${encodeURIComponent(emailGoogle)}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.autorizzato) {
+            utenteCorrente = {
+              email: emailGoogle,
+              nome: data.nome || nomeGoogle,
+              ruolo: data.ruolo || "Staff"
+            };
+            localStorage.setItem('partyAppUser', JSON.stringify(utenteCorrente));
+            mostraDashboard();
+          } else {
+            inizializzaGoogleSignIn();
+            mostraErroreLogin(`Accesso non autorizzato per l'email:<br><strong>${emailGoogle}</strong><br><br>Aggiungi questa mail nella scheda <em>Staff</em> del tuo foglio Google per abilitarla.`);
+          }
+        })
+        .catch(err => {
+          inizializzaGoogleSignIn();
+          mostraErroreLogin("Errore di connessione al database Google Fogli. Riprova tra qualche istante.");
+        });
     }
 
-    // Verifica presenza nella scheda 'Staff' di Google Fogli
-    async function verificaStaffSuFoglio(email, nomeDisplay) {
-      nascondiErroreLogin();
-      mostraToast("Verifica autorizzazione Staff...", "#3b82f6");
-
-      try {
-        const res = await fetch(`${SCRIPT_URL}?action=checkStaff&email=${encodeURIComponent(email)}`);
-        const result = await res.json();
-
-        if (result.autorizzato) {
-          utenteCorrente = {
-            email: email,
-            nome: result.nome || nomeDisplay,
-            ruolo: result.ruolo || 'Staff'
-          };
-          localStorage.setItem('partyAppUser', JSON.stringify(utenteCorrente));
-          mostraDashboard();
-          mostraToast(`Benvenuto ${utenteCorrente.nome}!`, "#10b981");
-        } else {
-          mostraErroreLogin(`⚠️ L'account Google <b>${email}</b> non è autorizzato nel database.`);
-        }
-      } catch (err) {
-        mostraErroreLogin("Errore di comunicazione con il database. Riprova.");
+    function mostraErroreLogin(msg) {
+      const box = document.getElementById('loginError');
+      if (box) {
+        box.innerHTML = msg;
+        box.style.display = 'block';
       }
     }
 
-    function mostraErroreLogin(messaggio) {
-      const box = document.getElementById('loginError');
-      box.innerHTML = messaggio;
-      box.style.display = 'block';
-    }
-
-    function nascondiErroreLogin() {
-      const box = document.getElementById('loginError');
-      box.style.display = 'none';
+    function mostraDashboard() {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('appScreen').style.display = 'block';
+      
+      const labelUser = document.getElementById('labelLoggedUser');
+      if (labelUser && utenteCorrente) {
+        labelUser.textContent = `${utenteCorrente.nome} (${utenteCorrente.ruolo || 'Staff'})`;
+      }
+      
+      generaGrigliaCalendario();
+      caricaEventiDalFoglio();
     }
 
     function eseguiLogout() {
@@ -685,212 +753,277 @@
       utenteCorrente = null;
       document.getElementById('appScreen').style.display = 'none';
       document.getElementById('loginScreen').style.display = 'flex';
-      nascondiErroreLogin();
+      const box = document.getElementById('loginError');
+      if (box) box.style.display = 'none';
       inizializzaGoogleSignIn();
+      mostraToast("Disconnessione effettuata");
     }
 
-    function mostraDashboard() {
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('appScreen').style.display = 'block';
-      document.getElementById('labelLoggedUser').innerText = `${utenteCorrente.nome} (${utenteCorrente.ruolo || 'Staff'})`;
-      
-      renderCalendario();
-      caricaEventiDaDatabase();
+    // -------------------------------------------------------------
+    // GESTIONE CALENDARIO E SINCRONIZZAZIONE FOGLI
+    // -------------------------------------------------------------
+    function generaGrigliaCalendario() {
+      const container = document.getElementById('calendarDays');
+      container.innerHTML = "";
+
+      // Ottobre 2026: 1 Ottobre è Giovedì -> 3 celle vuote (Lun, Mar, Mer)
+      const offsetIniziale = 3;
+      const totaleGiorni = 31;
+
+      for (let i = 0; i < offsetIniziale; i++) {
+        const emptyCell = document.createElement('div');
+        emptyCell.className = 'day empty';
+        container.appendChild(emptyCell);
+      }
+
+      for (let g = 1; g <= totaleGiorni; g++) {
+        const dayCell = document.createElement('div');
+        dayCell.className = 'day';
+        dayCell.id = `day-${g}`;
+        dayCell.textContent = g;
+        dayCell.onclick = () => apriModaleGiorno(g);
+        container.appendChild(dayCell);
+      }
+
+      applicaColoriCalendario();
     }
 
-    // Caricamento eventi da Google Fogli
-    async function caricaEventiDaDatabase() {
-      try {
-        const res = await fetch(`${SCRIPT_URL}?action=getEvents`);
-        const data = await res.json();
-        
-        eventsData = {};
-        if (data.eventi && Array.isArray(data.eventi)) {
-          data.eventi.forEach(ev => {
-            let day = null;
-            if (typeof ev.data === 'string' && ev.data.includes('/')) {
-              day = parseInt(ev.data.split('/')[0], 10);
-            } else if (typeof ev.data === 'string' && ev.data.includes('-')) {
-              day = parseInt(ev.data.split('-')[2], 10);
-            } else {
-              day = parseInt(ev.data, 10);
-            }
+    function caricaEventiDalFoglio() {
+      mostraToast("Aggiornamento dati dal foglio...");
+      fetch(`${SCRIPT_URL}?action=getEvents`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.eventi) {
+            eventsData = {};
+            data.eventi.forEach(ev => {
+              const dataStr = (ev.data || "").toString().trim();
+              let giorno = null;
 
-            if (day && day >= 1 && day <= 31) {
-              eventsData[day] = {
-                id: ev.id,
-                data: ev.data,
-                orario: ev.orario,
-                nome: ev.nome,
-                telefono: ev.telefono,
-                stato: ev.stato,
-                acconto: ev.acconto,
-                note: ev.note,
-                inseritoDa: ev.inseritoDa,
-                dataCreazione: ev.dataCreazione
-              };
-            }
-          });
+              // Riconosce formati italiani GG/MM/AAAA o ISO AAAA-MM-GG
+              if (dataStr.includes('/')) {
+                const parts = dataStr.split('/');
+                giorno = parseInt(parts[0], 10);
+              } else if (dataStr.includes('-')) {
+                const parts = dataStr.split('-');
+                giorno = parseInt(parts[2], 10);
+              } else if (!isNaN(parseInt(dataStr, 10))) {
+                giorno = parseInt(dataStr, 10);
+              }
+
+              if (giorno && giorno >= 1 && giorno <= 31) {
+                eventsData[giorno] = {
+                  id: ev.id,
+                  data: ev.data,
+                  orario: ev.orario || "",
+                  nome: ev.nome || "",
+                  telefono: ev.telefono || "",
+                  stato: ev.stato || "Appuntamento",
+                  acconto: ev.acconto || "",
+                  note: ev.note || "",
+                  inseritoDa: ev.inseritoDa || "",
+                  dataCreazione: ev.dataCreazione || ""
+                };
+              }
+            });
+            applicaColoriCalendario();
+            mostraToast("Dati sincronizzati!");
+          }
+        })
+        .catch(err => {
+          console.error("Errore fetch eventi:", err);
+          mostraToast("Errore di sincronizzazione");
+        });
+    }
+
+    function applicaColoriCalendario() {
+      for (let g = 1; g <= 31; g++) {
+        const cella = document.getElementById(`day-${g}`);
+        if (!cella) continue;
+
+        cella.classList.remove('appointment', 'requested', 'blocked');
+
+        const evento = eventsData[g];
+        if (evento && evento.stato) {
+          if (evento.stato === "Appuntamento") {
+            cella.classList.add('appointment');
+          } else if (evento.stato === "Data richiesta") {
+            cella.classList.add('requested');
+          } else if (evento.stato === "Data Bloccata") {
+            cella.classList.add('blocked');
+          }
         }
-        renderCalendario();
-      } catch (err) {
-        mostraToast("⚠️ Connessione al foglio non riuscita", "#eab308");
       }
     }
 
-    function renderCalendario() {
-      const grid = document.getElementById('calendarDays');
-      grid.innerHTML = '';
-      
-      const startDay = 3; // Ottobre 2026 inizia di Giovedì
-      const totalDays = 31;
-
-      for (let i = 0; i < startDay; i++) {
-        grid.innerHTML += `<div class="day empty"></div>`;
-      }
-
-      for (let d = 1; d <= totalDays; d++) {
-        const ev = eventsData[d];
-        let statoClasse = '';
-        
-        if (ev) {
-          if (ev.stato === 'Appuntamento') statoClasse = 'appointment';
-          else if (ev.stato === 'Data richiesta') statoClasse = 'requested';
-          else if (ev.stato === 'Data Bloccata') statoClasse = 'blocked';
-        }
-
-        grid.innerHTML += `<div class="day ${statoClasse}" onclick="apriModale(${d})">${d}</div>`;
-      }
+    // -------------------------------------------------------------
+    // GESTIONE MODALE EVENTO
+    // -------------------------------------------------------------
+    function formattaDataItaliana(giorno) {
+      const gStr = giorno < 10 ? `0${giorno}` : giorno;
+      return `${gStr}/10/2026`;
     }
 
-    function apriModale(day) {
-      selectedDayNumber = day;
-      const dataItaliana = `${day < 10 ? '0' + day : day}/10/2026`;
-      
-      document.getElementById('modalTitle').innerText = `${day} Ottobre 2026`;
-      document.getElementById('modalDateSubtitle').innerText = dataItaliana;
-      document.getElementById('eventModal').style.display = 'flex';
-      
+    function apriModaleGiorno(giorno) {
+      selectedDayNumber = giorno;
+      const dataItaliana = formattaDataItaliana(giorno);
+
+      document.getElementById('modalTitle').textContent = `Giorno ${giorno}`;
+      document.getElementById('modalDateSubtitle').textContent = dataItaliana;
+
+      const evento = eventsData[giorno];
       const auditBox = document.getElementById('auditStamp');
-      const ev = eventsData[day];
-      
-      if (ev) {
-        document.getElementById('eventType').value = ev.stato || 'Appuntamento';
-        document.getElementById('eventName').value = ev.nome || '';
-        document.getElementById('eventPhone').value = ev.telefono || '';
-        document.getElementById('eventTime').value = ev.orario || '';
-        document.getElementById('eventDeposit').value = ev.acconto || '';
-        document.getElementById('eventNotes').value = ev.note || '';
-        document.getElementById('btnDelete').style.display = 'block';
+      const btnDelete = document.getElementById('btnDelete');
 
-        if (ev.dataCreazione || ev.inseritoDa) {
-          auditBox.innerHTML = `Registrato da: <b>${ev.inseritoDa || 'Staff'}</b><br>Data e Ora: <b>${ev.dataCreazione || 'N.D.'}</b>`;
+      if (evento) {
+        document.getElementById('eventName').value = evento.nome || "";
+        document.getElementById('eventPhone').value = evento.telefono || "";
+        document.getElementById('eventTime').value = evento.orario || "";
+        document.getElementById('eventType').value = evento.stato || "Appuntamento";
+        document.getElementById('eventDeposit').value = evento.acconto || "";
+        document.getElementById('eventNotes').value = evento.note || "";
+
+        if (evento.inseritoDa) {
+          auditBox.innerHTML = `Registrato da: <strong>${evento.inseritoDa}</strong><br>Data e ora: <strong>${evento.dataCreazione || 'N/D'}</strong>`;
           auditBox.style.display = 'block';
         } else {
           auditBox.style.display = 'none';
         }
+        btnDelete.style.display = 'block';
       } else {
-        document.getElementById('eventType').value = 'Appuntamento';
-        document.getElementById('eventName').value = '';
-        document.getElementById('eventPhone').value = '';
-        document.getElementById('eventTime').value = '';
-        document.getElementById('eventDeposit').value = '';
-        document.getElementById('eventNotes').value = '';
-        document.getElementById('btnDelete').style.display = 'none';
+        document.getElementById('eventName').value = "";
+        document.getElementById('eventPhone').value = "";
+        document.getElementById('eventTime').value = "";
+        document.getElementById('eventType').value = "Appuntamento";
+        document.getElementById('eventDeposit').value = "";
+        document.getElementById('eventNotes').value = "";
         auditBox.style.display = 'none';
+        btnDelete.style.display = 'none';
       }
+
+      document.getElementById('eventModal').style.display = 'flex';
     }
 
     function chiudiModale() {
       document.getElementById('eventModal').style.display = 'none';
-    }
-
-    async function salvaEvento() {
-      const btnSave = document.getElementById('btnSave');
-      btnSave.disabled = true;
-      btnSave.innerText = "Salvataggio...";
-
-      const day = selectedDayNumber;
-      const dataItaliana = `${day < 10 ? '0' + day : day}/10/2026`;
-      const idEvento = (eventsData[day] && eventsData[day].id) ? eventsData[day].id : `EV-${Date.now()}`;
-      
-      const payload = {
-        action: "saveEvent",
-        id: idEvento,
-        data: dataItaliana,
-        orario: document.getElementById('eventTime').value,
-        nome: document.getElementById('eventName').value,
-        telefono: document.getElementById('eventPhone').value,
-        stato: document.getElementById('eventType').value,
-        acconto: document.getElementById('eventDeposit').value,
-        note: document.getElementById('eventNotes').value,
-        userEmail: utenteCorrente.email
-      };
-
-      eventsData[day] = {
-        ...payload,
-        inseritoDa: utenteCorrente.email,
-        dataCreazione: eventsData[day]?.dataCreazione || "In sincronizzazione..."
-      };
-      
-      renderCalendario();
-      chiudiModale();
-      mostraToast("✅ Evento registrato nel foglio!", "#10b981");
-
-      try {
-        await fetch(SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload)
-        });
-        caricaEventiDaDatabase();
-      } catch (err) {
-        mostraToast("⚠️ Salvato in locale, errore sync Google", "#eab308");
-      } finally {
-        btnSave.disabled = false;
-        btnSave.innerText = "Salva";
-      }
-    }
-
-    async function eliminaEvento() {
-      const day = selectedDayNumber;
-      const ev = eventsData[day];
-      if (!ev) return;
-
-      delete eventsData[day];
-      renderCalendario();
-      chiudiModale();
-      mostraToast("🗑️ Evento annullato", "#ef4444");
-
-      try {
-        await fetch(SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: "deleteEvent", id: ev.id })
-        });
-        caricaEventiDaDatabase();
-      } catch (err) {
-        console.error(err);
-      }
+      selectedDayNumber = null;
     }
 
     function selezionaTipoVeloce(tipo) {
       if (!selectedDayNumber) {
-        mostraToast("👉 Tocca prima un giorno sul calendario", "#3b82f6");
+        mostraToast("Seleziona prima un giorno dal calendario");
         return;
       }
-      apriModale(selectedDayNumber);
       document.getElementById('eventType').value = tipo;
+      salvaEvento();
     }
 
-    function mostraToast(testo, colore) {
+    function salvaEvento() {
+      if (!selectedDayNumber) return;
+
+      const giorno = selectedDayNumber;
+      const dataItaliana = formattaDataItaliana(giorno);
+      const eventoEsistente = eventsData[giorno];
+
+      const eventoPayload = {
+        action: "saveEvent",
+        id: eventoEsistente ? eventoEsistente.id : `EVT-${Date.now()}`,
+        data: dataItaliana,
+        orario: document.getElementById('eventTime').value,
+        nome: document.getElementById('eventName').value.trim(),
+        telefono: document.getElementById('eventPhone').value.trim(),
+        stato: document.getElementById('eventType').value,
+        acconto: document.getElementById('eventDeposit').value.trim(),
+        note: document.getElementById('eventNotes').value.trim(),
+        userEmail: utenteCorrente ? utenteCorrente.email : "staff@insideout.it"
+      };
+
+      const btnSave = document.getElementById('btnSave');
+      btnSave.disabled = true;
+      btnSave.textContent = "Salvataggio...";
+
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(eventoPayload)
+      })
+      .then(res => res.json())
+      .then(result => {
+        btnSave.disabled = false;
+        btnSave.textContent = "Salva";
+
+        if (result && result.success) {
+          eventsData[giorno] = {
+            id: eventoPayload.id,
+            data: eventoPayload.data,
+            orario: eventoPayload.orario,
+            nome: eventoPayload.nome,
+            telefono: eventoPayload.telefono,
+            stato: eventoPayload.stato,
+            acconto: eventoPayload.acconto,
+            note: eventoPayload.note,
+            inseritoDa: eventoPayload.userEmail,
+            dataCreazione: result.timestamp || formattaDataItaliana(giorno)
+          };
+          applicaColoriCalendario();
+          chiudiModale();
+          mostraToast("Evento salvato con successo!");
+        } else {
+          mostraToast("Errore nel salvataggio dei dati");
+        }
+      })
+      .catch(err => {
+        btnSave.disabled = false;
+        btnSave.textContent = "Salva";
+        console.error("Errore salvataggio:", err);
+        mostraToast("Errore di connessione");
+      });
+    }
+
+    function eliminaEvento() {
+      if (!selectedDayNumber || !eventsData[selectedDayNumber]) return;
+
+      const giorno = selectedDayNumber;
+      const idEvento = eventsData[giorno].id;
+      const btnDelete = document.getElementById('btnDelete');
+
+      btnDelete.disabled = true;
+      btnDelete.textContent = "Eliminazione...";
+
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "deleteEvent", id: idEvento })
+      })
+      .then(res => res.json())
+      .then(result => {
+        btnDelete.disabled = false;
+        btnDelete.textContent = "Elimina";
+
+        if (result && result.success) {
+          delete eventsData[giorno];
+          applicaColoriCalendario();
+          chiudiModale();
+          mostraToast("Evento annullato");
+        } else {
+          mostraToast("Errore durante l'eliminazione");
+        }
+      })
+      .catch(err => {
+        btnDelete.disabled = false;
+        btnDelete.textContent = "Elimina";
+        console.error("Errore eliminazione:", err);
+        mostraToast("Errore di connessione");
+      });
+    }
+
+    function mostraToast(testo) {
       const toast = document.getElementById('toastMessage');
-      toast.innerText = testo;
-      toast.style.background = colore || '#10b981';
+      if (!toast) return;
+      toast.textContent = testo;
       toast.classList.add('show');
-      setTimeout(() => toast.classList.remove('show'), 3200);
+      setTimeout(() => {
+        toast.classList.remove('show');
+      }, 2600);
     }
   </script>
 </body>
