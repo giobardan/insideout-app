@@ -22,7 +22,8 @@
       margin: 0; 
       padding: 0; 
       background-color: var(--bg-main); 
-      background-image: url('https://placehold.co/1080x1920/60a5fa/ffffff?text=La+tua+Immagine+Sfondo');
+      /* Sfondo con immagine personalizzata o gradiente professionale di riserva */
+      background-image: linear-gradient(rgba(248, 250, 252, 0.85), rgba(248, 250, 252, 0.85)), url('sfondo.jpg');
       background-size: cover;
       background-attachment: fixed;
       background-position: center;
@@ -34,7 +35,9 @@
     /* SCHERMATA LOGIN */
     .login-screen {
       height: 100vh;
-      background: linear-gradient(135deg, #facc15 0%, #4ade80 25%, #60a5fa 50%, #c084fc 75%, #ef4444 100%);
+      background: linear-gradient(135deg, rgba(250, 204, 21, 0.9) 0%, rgba(74, 222, 128, 0.9) 25%, rgba(96, 165, 250, 0.9) 50%, rgba(192, 132, 252, 0.9) 75%, rgba(239, 68, 68, 0.9) 100%), url('sfondo.jpg');
+      background-size: cover;
+      background-position: center;
       display: flex; 
       flex-direction: column; 
       align-items: center; 
@@ -45,12 +48,12 @@
 
     .login-card {
       background: rgba(255, 255, 255, 0.96);
-      backdrop-filter: blur(12px);
+      backdrop-filter: blur(14px);
       border-radius: 24px;
-      padding: 35px 25px;
+      padding: 40px 25px;
       width: 100%;
       max-width: 380px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.18);
+      box-shadow: 0 20px 45px rgba(0,0,0,0.18);
       text-align: center;
       box-sizing: border-box;
     }
@@ -74,7 +77,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      margin: 20px 0 10px;
+      margin: 25px 0 10px;
       min-height: 48px;
     }
 
@@ -87,57 +90,16 @@
       gap: 8px;
     }
 
-    .toggle-fallback-btn {
-      background: transparent;
-      border: none;
-      color: #94a3b8;
-      font-size: 0.75rem;
-      margin-top: 15px;
-      cursor: pointer;
-      text-decoration: underline;
-    }
-
-    .login-fallback-box {
-      margin-top: 15px;
-      padding-top: 15px;
-      border-top: 1px dashed #cbd5e1;
-      font-size: 0.8rem;
-      color: #64748b;
-      display: none; /* Nascosto di default, visibile solo se Google fallisce o su richiesta */
-    }
-
-    .login-fallback-box input {
-      width: 100%;
-      padding: 10px 12px;
-      border: 1.5px solid #cbd5e1;
-      border-radius: 8px;
-      margin: 8px 0;
-      box-sizing: border-box;
-      font-size: 0.85rem;
-    }
-
-    .btn-fallback {
-      background: #475569;
-      color: white;
-      border: none;
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 0.8rem;
-      width: 100%;
-    }
-
     .login-error {
       color: #dc2626;
       font-size: 0.85rem;
       font-weight: 700;
-      margin-top: 15px;
+      margin-top: 18px;
       display: none;
       line-height: 1.4;
       background: #fee2e2;
       padding: 12px;
-      border-radius: 10px;
+      border-radius: 12px;
     }
 
     /* BARRA SUPERIORE APP */
@@ -153,29 +115,30 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(255, 255, 255, 0.9);
-      backdrop-filter: blur(8px);
-      padding: 10px 16px;
-      border-radius: 14px;
-      margin-bottom: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(10px);
+      padding: 12px 18px;
+      border-radius: 16px;
+      margin-bottom: 14px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
       font-size: 0.85rem;
     }
     .user-info { display: flex; align-items: center; gap: 8px; font-weight: 700; }
     .status-badge {
       display: inline-block;
-      width: 8px;
-      height: 8px;
+      width: 9px;
+      height: 9px;
       border-radius: 50%;
       background: #22c55e;
     }
     .btn-logout {
-      background: transparent;
+      background: #f1f5f9;
       border: none;
-      color: #64748b;
+      color: #475569;
+      padding: 6px 12px;
+      border-radius: 8px;
       font-weight: 700;
       cursor: pointer;
-      text-decoration: underline;
       font-size: 0.8rem;
     }
 
@@ -183,11 +146,12 @@
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
-      background: #fff; 
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
       padding: 15px 20px; 
       border-radius: 16px; 
       margin-bottom: 12px; 
-      box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06); 
       font-weight: 900; 
       font-size: 1.25rem;
     }
@@ -210,10 +174,11 @@
       font-size: 0.8rem; 
       font-weight: 800; 
       color: #334155; 
-      background: #fff; 
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
       padding: 12px 14px; 
       border-radius: 14px; 
-      box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
     .legend-item { display: flex; align-items: center; }
     .dot { width: 12px; height: 12px; border-radius: 50%; margin-right: 6px; }
@@ -235,7 +200,8 @@
     }
     
     .day { 
-      background: #fff; 
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(6px);
       aspect-ratio: 1;
       display: flex;
       flex-direction: column;
@@ -244,7 +210,7 @@
       border-radius: 14px; 
       font-weight: 800; 
       font-size: 1.1rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05); 
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06); 
       color: #334155; 
       cursor: pointer; 
       transition: transform 0.1s, box-shadow 0.1s; 
@@ -257,16 +223,19 @@
       background: var(--color-appuntamento); 
       color: white; 
       border: 2px solid #16a34a; 
+      box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3);
     } 
     .day.requested { 
       background: var(--color-richiesta); 
       color: #713f12; 
       border: 2px solid #ca8a04; 
+      box-shadow: 0 4px 10px rgba(234, 179, 8, 0.3);
     } 
     .day.blocked { 
       background: var(--color-bloccata); 
       color: white; 
       border: 2px solid #dc2626; 
+      box-shadow: 0 4px 10px rgba(239, 68, 68, 0.3);
     } 
     .day.empty { background: transparent; box-shadow: none; cursor: default; }
 
@@ -276,8 +245,8 @@
       bottom: 0; 
       left: 0; 
       right: 0; 
-      background: rgba(255, 255, 255, 0.92); 
-      backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.94); 
+      backdrop-filter: blur(14px);
       padding: 14px 15px; 
       display: flex; 
       justify-content: center; 
@@ -460,29 +429,19 @@
 </head>
 <body>
 
-  <!-- SCHERMATA LOGIN -->
+  <!-- SCHERMATA LOGIN (SOLO GOOGLE UFFICIALE) -->
   <div id="loginScreen" class="login-screen">
     <div class="login-card">
       <div class="login-logo">Party App</div>
       <div class="login-subtitle">Accesso Riservato Staff</div>
       
-      <!-- Contenitore Pulsante Google Identity Services -->
+      <!-- Contenitore Ufficiale Google Identity Services -->
       <div id="googleBtnContainer" class="google-btn-wrapper">
-        <span class="loading-spinner">Caricamento accesso sicuro...</span>
+        <span class="loading-spinner">Caricamento accesso sicuro Google...</span>
       </div>
 
-      <!-- Errore Login -->
+      <!-- Errore Login (se l'utente non è autorizzato sul foglio Staff) -->
       <div id="loginError" class="login-error"></div>
-
-      <!-- Tasto discreto per emergenza/collaudo -->
-      <button type="button" class="toggle-fallback-btn" onclick="toggleFallback()">Problemi con il tasto Google? Clicca qui</button>
-
-      <!-- Modalità Collaudo/Manuale di riserva -->
-      <div id="devFallbackBox" class="login-fallback-box">
-        <span>Accesso emergenza con email autorizzata:</span>
-        <input type="email" id="manualEmailInput" placeholder="nome@locale.it">
-        <button class="btn-fallback" onclick="eseguiAccessoManuale()">Entra con Email</button>
-      </div>
     </div>
   </div>
 
@@ -593,7 +552,7 @@
 
   <script>
     // -------------------------------------------------------------
-    // CONFIGURAZIONI PRINCIPALI
+    // CONFIGURAZIONI UFFICIALI
     // -------------------------------------------------------------
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxvXaPaj-B8rzOKm-PQpOUycm15WLRHaSxNcpHYULvN0d41FtmSKzHmkU0PJFOKrSes/exec";
     const GOOGLE_CLIENT_ID = "566113387609-3ko0vrp31fqspr523sffucbvuto43h4f.apps.googleusercontent.com";
@@ -603,6 +562,7 @@
     let eventsData = {};
     let tentativiCaricamentoGoogle = 0;
 
+    // Recupera eventuale sessione attiva
     try {
       const stored = localStorage.getItem('partyAppUser');
       if (stored) utenteCorrente = JSON.parse(stored);
@@ -616,7 +576,7 @@
       }
     });
 
-    // Inizializzazione sicura e resiliente del pulsante Google
+    // Inizializzazione esclusiva del vero Google Sign-In
     function inizializzaGoogleSignIn() {
       const container = document.getElementById("googleBtnContainer");
       if (!container) return;
@@ -629,7 +589,7 @@
             auto_select: false
           });
 
-          container.innerHTML = ""; // Rimuove lo spinner
+          container.innerHTML = "";
           google.accounts.id.renderButton(
             container,
             { 
@@ -643,27 +603,19 @@
           );
         } catch (err) {
           console.error("Errore inizializzazione Google:", err);
-          mostraErroreLogin("Configurazione Google in corso. Usa l'opzione qui sotto.");
-          document.getElementById('devFallbackBox').style.display = 'block';
+          mostraErroreLogin("Errore nel collegamento a Google. Ricarica la pagina.");
         }
       } else {
-        // Se la libreria Google non è ancora pronta, riprova ogni 250ms fino a 20 volte (5 secondi)
-        if (tentativiCaricamentoGoogle < 20) {
+        if (tentativiCaricamentoGoogle < 25) {
           tentativiCaricamentoGoogle++;
-          setTimeout(inizializzaGoogleSignIn, 250);
+          setTimeout(inizializzaGoogleSignIn, 200);
         } else {
-          container.innerHTML = `<span style="font-size:0.8rem; color:#dc2626;">Impossibile contattare Google.</span>`;
-          document.getElementById('devFallbackBox').style.display = 'block';
+          container.innerHTML = `<span style="font-size:0.85rem; color:#dc2626; font-weight:700;">Connessione a Google non riuscita.<br>Ricarica la pagina.</span>`;
         }
       }
     }
 
-    function toggleFallback() {
-      const box = document.getElementById('devFallbackBox');
-      box.style.display = (box.style.display === 'block') ? 'none' : 'block';
-    }
-
-    // Decodifica sicura del Token JWT fornito da Google
+    // Decodifica sicura del Token JWT Google
     function decodificaJwtGoogle(token) {
       try {
         const base64Url = token.split('.')[1];
@@ -677,11 +629,11 @@
       }
     }
 
-    // Risposta ufficiale da Google dopo autenticazione con impronta o password
+    // Ricezione risposta autenticata da Google
     async function gestisciRispostaGoogle(response) {
       const payload = decodificaJwtGoogle(response.credential);
       if (!payload || !payload.email) {
-        mostraErroreLogin("Verifica Google non riuscita. Riprova.");
+        mostraErroreLogin("Accesso con Google non riuscito. Riprova.");
         return;
       }
 
@@ -689,16 +641,6 @@
       const nomeGoogle = payload.name || emailGoogle;
 
       await verificaStaffSuFoglio(emailGoogle, nomeGoogle);
-    }
-
-    // Modalità manuale di collaudo/emergenza
-    async function eseguiAccessoManuale() {
-      const email = document.getElementById('manualEmailInput').value.trim().toLowerCase();
-      if (!email || !email.includes('@')) {
-        mostraErroreLogin("Inserisci un indirizzo email valido.");
-        return;
-      }
-      await verificaStaffSuFoglio(email, email);
     }
 
     // Verifica presenza nella scheda 'Staff' di Google Fogli
@@ -720,10 +662,10 @@
           mostraDashboard();
           mostraToast(`Benvenuto ${utenteCorrente.nome}!`, "#10b981");
         } else {
-          mostraErroreLogin(`⚠️ L'account <b>${email}</b> non è autorizzato nel foglio Staff.`);
+          mostraErroreLogin(`⚠️ L'account Google <b>${email}</b> non è autorizzato nel database.`);
         }
       } catch (err) {
-        mostraErroreLogin("Errore di connessione al database Google. Riprova tra poco.");
+        mostraErroreLogin("Errore di comunicazione con il database. Riprova.");
       }
     }
 
@@ -842,7 +784,7 @@
         document.getElementById('btnDelete').style.display = 'block';
 
         if (ev.dataCreazione || ev.inseritoDa) {
-          auditBox.innerHTML = `Registrato da: <b>${ev.inseritoDa || 'Staff'}</b><br>Data e Ora inserimento: <b>${ev.dataCreazione || 'N.D.'}</b>`;
+          auditBox.innerHTML = `Registrato da: <b>${ev.inseritoDa || 'Staff'}</b><br>Data e Ora: <b>${ev.dataCreazione || 'N.D.'}</b>`;
           auditBox.style.display = 'block';
         } else {
           auditBox.style.display = 'none';
@@ -893,7 +835,7 @@
       
       renderCalendario();
       chiudiModale();
-      mostraToast("✅ Evento salvato nel foglio!", "#10b981");
+      mostraToast("✅ Evento registrato nel foglio!", "#10b981");
 
       try {
         await fetch(SCRIPT_URL, {
