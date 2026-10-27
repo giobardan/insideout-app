@@ -447,9 +447,6 @@
 </head>
 <body>
 
-  <!-- INPUT FILE INVISIBILE PER L'UPLOAD DIRETTO DI UN NUOVO SFONDO -->
-  <input type="file" id="bgFileInput" accept="image/*" style="display:none;" onchange="elaboraSfondoCaricato(event)">
-
   <!-- SCHERMATA LOGIN (ESCLUSIVAMENTE GOOGLE SIGN-IN) -->
   <div id="loginScreen" class="login-screen">
     <div class="login-card">
@@ -476,8 +473,6 @@
         <span id="labelLoggedUser">Staff Inside Out</span>
       </div>
       <div class="top-actions">
-        <!-- Tasto per caricare direttamente lo sfondo dal proprio smartphone o computer -->
-        <button class="btn-top" title="Carica sfondo personalizzato" onclick="document.getElementById('bgFileInput').click()">🖼️ Sfondo</button>
         <button class="btn-top" title="Aggiorna calendario" onclick="caricaEventiDalFoglio()">🔄</button>
         <button class="btn-top" onclick="eseguiLogout()">Esci</button>
       </div>
@@ -593,9 +588,6 @@
     meseVisualizzato = new Date(meseVisualizzato.getFullYear(), meseVisualizzato.getMonth(), 1);
     let selectedDateKey = null;
 
-    // Inizializza eventuale sfondo personalizzato salvato in locale
-    inizializzaSfondo();
-
     // Recupera eventuale sessione attiva
     try {
       const stored = localStorage.getItem('partyAppUser');
@@ -609,46 +601,6 @@
         inizializzaGoogleSignIn();
       }
     });
-
-    // -------------------------------------------------------------
-    // GESTIONE SFONDO PERSONALIZZATO (UPLOAD DIRETTO E FALLBACK)
-    // -------------------------------------------------------------
-    function inizializzaSfondo() {
-      try {
-        const bgSalvato = localStorage.getItem('partyAppCustomBg');
-        if (bgSalvato) {
-          applicaSfondo(bgSalvato);
-        }
-      } catch(e) {}
-    }
-
-    function applicaSfondo(dataUrl) {
-      document.body.style.backgroundImage = `linear-gradient(rgba(248, 250, 252, 0.88), rgba(248, 250, 252, 0.88)), url('${dataUrl}')`;
-      const login = document.getElementById('loginScreen');
-      if (login) {
-        login.style.background = `linear-gradient(135deg, rgba(250, 204, 21, 0.88) 0%, rgba(74, 222, 128, 0.88) 25%, rgba(96, 165, 250, 0.88) 50%, rgba(192, 132, 252, 0.88) 75%, rgba(239, 68, 68, 0.88) 100%), url('${dataUrl}')`;
-        login.style.backgroundSize = 'cover';
-        login.style.backgroundPosition = 'center';
-      }
-    }
-
-    function elaboraSfondoCaricato(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const dataUrl = e.target.result;
-        try {
-          localStorage.setItem('partyAppCustomBg', dataUrl);
-        } catch(err) {
-          console.warn("Impossibile salvare in localStorage (dimensione elevata), applico alla sessione");
-        }
-        applicaSfondo(dataUrl);
-        mostraToast("Nuovo sfondo applicato con successo!");
-      };
-      reader.readAsDataURL(file);
-    }
 
     // -------------------------------------------------------------
     // AUTENTICAZIONE CON GOOGLE SIGN-IN UFFICIALE
