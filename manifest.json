@@ -1,15 +1,25 @@
 {
-  "name": "Insideout App",
-  "short_name": "Insideapp",
-  "start_url": "./",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#000000",
-  "icons": [
-    {
-      "src": "icona.png",
-      "sizes": "512x512",
-      "type": "image/png"
-    }
-  ]
+"name": "Inside Out Party App",
+"short_name": "Party App",
+"description": "Gestionale Appuntamenti e Feste - Inside Out Party",
+"start_url": "/insideout-app/",
+"scope": "/insideout-app/",
+"display": "standalone",
+"orientation": "portrait",
+"background_color": "#f8fafc",
+"theme_color": "#2563eb",
+"icons": [
+{
+"src": "icon-192.png",
+"sizes": "192x192",
+"type": "image/png",
+"purpose": "any maskable"
+},
+{
+"src": "icona.png",
+"sizes": "512x512",
+"type": "image/png",
+"purpose": "any maskable"
+}
+]
 }
