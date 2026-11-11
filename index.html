@@ -583,10 +583,137 @@
     let eventsData = {};
     let tentativiCaricamentoGoogle = 0;
 
-    // Mese visualizzato: il calendario parte dal mese corrente.
+    // Mese visualizzato: il calendario parte dal mese corrente
     let meseVisualizzato = new Date();
     meseVisualizzato = new Date(meseVisualizzato.getFullYear(), meseVisualizzato.getMonth(), 1);
     let selectedDateKey = null;
+
+    // -------------------------------------------------------------
+    // MOTORE AUDIO MULTI-EFFETTO (Web Audio API + Supporto MP3)
+    // -------------------------------------------------------------
+    let audioCtx = null;
+    function getAudioContext() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function riproduciSuonoEvento(stato) {
+      // 1. Prova a riprodurre un file MP3 personalizzato presente nella cartella
+      let nomeFileMp3 = "";
+      if (stato === "Appuntamento") nomeFileMp3 = "suono-appuntamento.mp3";
+      else if (stato === "Data richiesta") nomeFileMp3 = "suono-richiesta.mp3";
+      else if (stato === "Data Bloccata") nomeFileMp3 = "suono-bloccata.mp3";
+
+      if (nomeFileMp3) {
+        const audio = new Audio(nomeFileMp3);
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise.then(() => {
+            // File MP3 trovato e riprodotto con successo!
+          }).catch(() => {
+            // Se il file MP3 non esiste sul repository, usa il sintetizzatore nativo
+            suonaSintetizzatore(stato);
+          });
+          return;
+        }
+      }
+      suonaSintetizzatore(stato);
+    }
+
+    function suonaSintetizzatore(stato) {
+      try {
+        const ctx = getAudioContext();
+        const t0 = ctx.currentTime;
+
+        if (stato === "Appuntamento") {
+          // 🔔 CAMPANELLO DA RECEPTION / TING BRILLANTE
+          [1318.5, 2637].forEach(freq => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(freq, t0);
+
+            gain.gain.setValueAtTime(0.35, t0);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.2);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(t0);
+            osc.stop(t0 + 1.25);
+          });
+        } 
+        else if (stato === "Data richiesta") {
+          // 👏 APPLAUSO / CLAP RITMICO CELEBRATIVO
+          for (let i = 0; i < 7; i++) {
+            const timeClap = t0 + (i * 0.12) + (Math.random() * 0.03);
+            const bufferSize = ctx.sampleRate * 0.06;
+            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let j = 0; j < bufferSize; j++) {
+              data[j] = (Math.random() * 2 - 1) * Math.exp(-j / (bufferSize * 0.25));
+            }
+
+            const noise = ctx.createBufferSource();
+            noise.buffer = buffer;
+
+            const filter = ctx.createBiquadFilter();
+            filter.type = "bandpass";
+            filter.frequency.value = 1100 + Math.random() * 400;
+            filter.Q.value = 1.6;
+
+            const gain = ctx.createGain();
+            gain.gain.setValueAtTime(0.45, timeClap);
+            gain.gain.exponentialRampToValueAtTime(0.001, timeClap + 0.08);
+
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(ctx.destination);
+
+            noise.start(timeClap);
+            noise.stop(timeClap + 0.09);
+          }
+        } 
+        else if (stato === "Data Bloccata") {
+          // 🎺 TROMBETTA FESTOSA / FANFARA DI VITTORIA (Ta-da-da-daaa!)
+          const noteFanfara = [
+            { f: 523.25, start: 0.00, dur: 0.11 }, // Do5
+            { f: 659.25, start: 0.12, dur: 0.11 }, // Mi5
+            { f: 783.99, start: 0.24, dur: 0.13 }, // Sol5
+            { f: 1046.50, start: 0.39, dur: 0.45 } // Do6 squillante
+          ];
+
+          noteFanfara.forEach(nota => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const filter = ctx.createBiquadFilter();
+
+            osc.type = "sawtooth";
+            osc.frequency.setValueAtTime(nota.f, t0 + nota.start);
+
+            filter.type = "lowpass";
+            filter.frequency.setValueAtTime(2200, t0 + nota.start);
+
+            gain.gain.setValueAtTime(0.001, t0 + nota.start);
+            gain.gain.linearRampToValueAtTime(0.3, t0 + nota.start + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, t0 + nota.start + nota.dur);
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(ctx.destination);
+
+            osc.start(t0 + nota.start);
+            osc.stop(t0 + nota.start + nota.dur + 0.05);
+          });
+        }
+      } catch (e) {
+        console.warn("Riproduzione audio non disponibile o bloccata:", e);
+      }
+    }
 
     // Recupera eventuale sessione attiva
     try {
@@ -744,7 +871,7 @@
       match = testo.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
       if (match) return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
 
-      // Compatibilità con eventuali vecchie righe contenenti solo il giorno.
+      // Compatibilità con eventuali vecchie righe contenenti solo il numero del giorno
       match = testo.match(/^(\d{1,2})$/);
       if (match) return new Date(meseVisualizzato.getFullYear(), meseVisualizzato.getMonth(), Number(match[1]));
 
@@ -960,6 +1087,10 @@
           };
           applicaColoriCalendario();
           chiudiModale();
+          
+          // Esecuzione effetto sonoro dedicato allo stato
+          riproduciSuonoEvento(eventoPayload.stato);
+
           mostraToast("Evento salvato con successo!");
         } else {
           mostraToast("Errore nel salvataggio dei dati");
